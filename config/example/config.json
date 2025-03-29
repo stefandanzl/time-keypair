@@ -1,0 +1,46 @@
+{
+  "user1": {
+    "cron": [
+      {
+        "id": "job1",
+        "cron": "*/5 * * * *",
+        "url": "https://example.com/endpoint1",
+        "active": true
+      },
+      {
+        "id": "job2",
+        "cron": "0 */2 * * *",
+        "url": "https://example.com/endpoint2",
+        "active": false
+      }
+    ],
+    "data": {
+      "settings": {
+        "theme": "dark",
+        "notifications": true,
+        "language": "en"
+      },
+      "user_info": {
+        "name": "John Doe",
+        "email": "john@example.com"
+      }
+    }
+  },
+  "user2": {
+    "cron": [
+      {
+        "id": "daily-backup",
+        "cron": "0 0 * * *",
+        "url": "https://example.com/backup",
+        "active": true
+      }
+    ],
+    "data": {
+      "settings": {
+        "theme": "light",
+        "notifications": false,
+        "language": "de"
+      }
+    }
+  }
+}

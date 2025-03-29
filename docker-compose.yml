@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  cron-server:
+    build: .
+    container_name: cron-server
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - SUPER_ADMIN_KEY=your_super_admin_key_here  # Change this for production
+      - CONFIG_FILE_PATH=/config/config.json
+      - AUTO_SAVE_INTERVAL=60
+    volumes:
+      - ./config:/config
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
