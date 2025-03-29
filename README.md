@@ -58,6 +58,15 @@ The server can be configured using environment variables:
 
 ### Docker Run
 
+#### Basic
+````shell
+docker run -p 8080:8080 \
+        -e SUPER_ADMIN_KEY=super_admin_key \
+        -v ./config:/config \
+        ghcr.io/stefandanzl/time-keypair:latest
+````
+
+#### Detailed
 ````shell
 docker run -p 8080:8080 \
         -e PORT=8080 \
