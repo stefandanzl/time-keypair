@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"data-cron-server/config"
 	"context"
+	"data-cron-server/config"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -58,7 +58,8 @@ func TestRequireSuperAdmin(t *testing.T) {
 	
 	middleware := auth.RequireSuperAdmin(handler)
 	
-	// Valid key
+	// Valid key - Fix the path to match the expected format /admin/{super_key}/...
+	// The key is at position 1 (0-indexed) in the split path
 	req := httptest.NewRequest("GET", "/admin/"+superAdminKey+"/users", nil)
 	rr := httptest.NewRecorder()
 	middleware.ServeHTTP(rr, req)

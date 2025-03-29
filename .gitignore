@@ -23,3 +23,10 @@ config/config.json
 # OS specific files
 .DS_Store
 Thumbs.db
+
+# Taskfile
+.task/
+
+.vscode
+trash
+build/**

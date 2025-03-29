@@ -4,7 +4,6 @@ import (
 	"data-cron-server/api"
 	"data-cron-server/config"
 	"data-cron-server/cron"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -56,18 +55,18 @@ func main() {
 	go func() {
 		<-sigChan
 		log.Println("Shutting down server...")
-		
+
 		// Save configuration one last time
 		if err := config.SaveConfig(cfg, configFilePath); err != nil {
 			log.Printf("Error saving config on shutdown: %v", err)
 		}
-		
+
 		// Stop auto-save goroutine
 		close(stopChan)
-		
+
 		// Stop scheduler
 		scheduler.Stop()
-		
+
 		// Shutdown server
 		if err := server.Close(); err != nil {
 			log.Printf("Error shutting down server: %v", err)

@@ -23,7 +23,7 @@ curl -s "${SERVER}/admin/${SUPER_KEY}/users" | jq
 # Create a new cron job
 echo -e "\n\nCreating a new cron job..."
 curl -s -X POST "${SERVER}/cron/${USER}/jobs" \
-  -d "{\"id\":\"job1\",\"cron\":\"*/5 * * * *\",\"url\":\"https://example.com\",\"active\":true}"
+  -d "{\"id\":\"job1\",\"cron\":\"0 */5 * * * *\",\"url\":\"https://example.com\",\"active\":true}"
 
 # Get all jobs
 echo -e "\n\nGetting all jobs for user ${USER}..."

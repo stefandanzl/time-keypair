@@ -52,6 +52,37 @@ The server can be configured using environment variables:
 
 - `GET /health`: Health check endpoint
 
+## Getting Started
+
+### Prerequisites
+
+- [Go](https://golang.org/dl/) version 1.20 or higher
+- [Docker](https://www.docker.com/products/docker-desktop) (optional)
+- [Task](https://taskfile.dev/#/installation) - a task runner / simpler Make alternative
+
+### Build and Run
+
+1. **Build and Run Locally**:
+   ```bash
+   task build
+   task run
+   ```
+
+2. **Run with Docker**:
+   ```bash
+   task docker-run
+   ```
+   
+3. **Run with Docker Compose**:
+   ```bash
+   task docker-compose-up
+   ```
+
+4. **Run Tests**:
+   ```bash
+   task test
+   ```
+
 ## Usage Examples
 
 ### Create a new user
@@ -72,14 +103,6 @@ curl -X PUT http://localhost:8080/data/user1/settings -d '{"theme":"dark","notif
 ### Retrieve data
 ```bash
 curl http://localhost:8080/data/user1/settings
-```
-
-## Docker Deployment
-
-Build and run using Docker Compose:
-
-```bash
-docker-compose up -d
 ```
 
 ## Configuration Format

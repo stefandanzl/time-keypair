@@ -53,7 +53,7 @@ func (a *Authenticator) AuthenticateUser(user, key string) error {
 // RequireSuperAdmin is a middleware that requires super admin authentication
 func (a *Authenticator) RequireSuperAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		key := getKeyFromPath(r.URL.Path, 2) // /admin/{super_key}/...
+		key := getKeyFromPath(r.URL.Path, 1) // /admin/{super_key}/...
 		
 		if err := a.AuthenticateSuperAdmin(key); err != nil {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
