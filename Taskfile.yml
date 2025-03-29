@@ -4,13 +4,13 @@ tasks:
   build:
     desc: Build the application
     cmds:
-      - go build -o ./build/cron-server{{exeExt}} .
+      - go build -o ./build/server{{exeExt}} .
 
   run:
     desc: Run the application
     deps: [build]
     cmds:
-      - ./build/cron-server{{exeExt}}
+      - ./build/server{{exeExt}}
     env:
       PORT: '{{.PORT | default "8080"}}'
       SUPER_ADMIN_KEY: '{{.SUPER_ADMIN_KEY | default "super_admin_key"}}'
@@ -24,33 +24,29 @@ tasks:
 
   test-api:
     desc: Run API functionality tests
-    deps: [build]
     cmds:
       - bash ./tests/test-api.sh
 
   test-load:
     desc: Run load tests
-    deps: [build]
     cmds:
       - bash ./tests/load-test.sh
 
   test-error:
     desc: Run error handling tests
-    deps: [build]
     cmds:
       - bash ./tests/error-test.sh
 
   test:
     desc: Run all tests (alias for test-all)
     cmds:
-      - go test ./...
+      - task: test-all
 
   test-all:
     desc: Run all tests (unit tests, API tests, load tests, and error tests)
-    deps: [build]
     dir: tests
     cmds:
-      - bash ./run-all-tests.sh > test-all.log
+      - bash ./run-all-tests.sh
 
   clean:
     desc: Clean build artifacts
