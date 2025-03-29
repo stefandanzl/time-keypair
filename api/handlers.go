@@ -80,6 +80,20 @@ func (r *Router) handleAdminConfig(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
+		// Validate cron expressions in the configuration
+		for _, userData := range users {
+			for _, job := range userData.Cron {
+				if job.Cron != "" {
+					normalizedCron, err := utils.ValidateCronExpression(job.Cron)
+					if err != nil {
+						http.Error(w, fmt.Sprintf("Invalid cron expression for job %s: %v", job.ID, err), http.StatusBadRequest)
+						return
+					}
+					job.Cron = normalizedCron
+				}
+			}
+		}
+
 		// Replace config
 		r.config.Users = users
 
@@ -151,6 +165,14 @@ func (r *Router) handleCronJobs(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
+		// Validate and normalize cron expression
+		normalizedCron, err := utils.ValidateCronExpression(job.Cron)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Invalid cron expression: %v", err), http.StatusBadRequest)
+			return
+		}
+		job.Cron = normalizedCron
+
 		// Add job to config
 		r.config.AddUserJob(user, &job)
 
@@ -168,6 +190,18 @@ func (r *Router) handleCronJobs(w http.ResponseWriter, req *http.Request) {
 		if err := json.NewDecoder(req.Body).Decode(&jobs); err != nil {
 			http.Error(w, "Invalid request body", http.StatusBadRequest)
 			return
+		}
+
+		// Validate and normalize cron expressions
+		for _, job := range jobs {
+			if job.Cron != "" {
+				normalizedCron, err := utils.ValidateCronExpression(job.Cron)
+				if err != nil {
+					http.Error(w, fmt.Sprintf("Invalid cron expression for job %s: %v", job.ID, err), http.StatusBadRequest)
+					return
+				}
+				job.Cron = normalizedCron
+			}
 		}
 
 		// Remove all existing jobs
@@ -248,6 +282,16 @@ func (r *Router) handleCronJob(w http.ResponseWriter, req *http.Request) {
 
 		// Ensure job ID matches
 		job.ID = jobID
+
+		// Validate and normalize cron expression
+		if job.Cron != "" {
+			normalizedCron, err := utils.ValidateCronExpression(job.Cron)
+			if err != nil {
+				http.Error(w, fmt.Sprintf("Invalid cron expression: %v", err), http.StatusBadRequest)
+				return
+			}
+			job.Cron = normalizedCron
+		}
 
 		// Update job in config
 		r.config.AddUserJob(user, &job)
