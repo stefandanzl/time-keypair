@@ -30,6 +30,7 @@ The server can be configured using environment variables:
 - `DELETE /admin/{super_key}/users/{user}`: Delete a user
 - `GET /admin/{super_key}/config`: Get full configuration
 - `PUT /admin/{super_key}/config`: Replace full configuration
+- `GET /admin/{super_key}/reload`: Reload configuration from file
 
 ### Cron Endpoints
 
@@ -158,6 +159,11 @@ curl -X PUT http://localhost:8080/data/user1/settings -d '{"theme":"dark","notif
 ### Retrieve data
 ```bash
 curl http://localhost:8080/data/user1/settings
+```
+
+### Reload configuration from file
+```bash
+curl http://localhost:8080/admin/super_admin_key/reload
 ```
 
 ### Activate or deactivate a cron job

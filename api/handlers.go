@@ -9,8 +9,49 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 )
+
+// handleAdminReload handles reloading the configuration file
+func (r *Router) handleAdminReload(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Get the config file path from environment variable
+	configFilePath := os.Getenv("CONFIG_FILE_PATH")
+	if configFilePath == "" {
+		configFilePath = "./config/config.json" // Default path
+	}
+
+	// Load the configuration
+	newConfig, err := config.LoadConfig(configFilePath)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to load configuration: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Stop the current scheduler
+	r.scheduler.Stop()
+
+	// Update the configuration
+	r.config = newConfig
+
+	// Create a new scheduler with the updated configuration
+	r.scheduler = cron.NewScheduler(r.config)
+
+	response := struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}{
+		Success: true,
+		Message: fmt.Sprintf("Configuration reloaded from %s", configFilePath),
+	}
+
+	respondJSON(w, response)
+}
 
 // handleAdminUsers handles the admin users endpoint
 func (r *Router) handleAdminUsers(w http.ResponseWriter, req *http.Request) {

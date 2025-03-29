@@ -42,6 +42,8 @@ func (r *Router) setupAdminRoutes() {
 
 		// Route based on path pattern
 		switch {
+		case matchPath(path, "/admin/*/reload"):
+			r.handleAdminReload(w, req)
 		case matchPath(path, "/admin/*/users"):
 			r.handleAdminUsers(w, req)
 		case matchPath(path, "/admin/*/config"):

@@ -116,6 +116,10 @@ curl -s "${SERVER}/admin/${SUPER_KEY}/config" | jq
 echo -e "\n\nDeleting a user..."
 curl -s -X DELETE "${SERVER}/admin/${SUPER_KEY}/users/user2"
 
+# Test configuration reload
+echo -e "\n\nTesting configuration reload..."
+curl -s "${SERVER}/admin/${SUPER_KEY}/reload" | jq
+
 # Get all users after deletion
 echo -e "\n\nGetting all users after deletion..."
 curl -s "${SERVER}/admin/${SUPER_KEY}/users" | jq
