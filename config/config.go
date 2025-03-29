@@ -46,12 +46,14 @@ type UserData struct {
 type Config struct {
 	mutex sync.RWMutex
 	Users map[string]*UserData `json:"users"`
+	Changed bool // Track if config has changed since last save
 }
 
 // NewConfig creates a new empty configuration
 func NewConfig() *Config {
 	return &Config{
 		Users: make(map[string]*UserData),
+		Changed: true, // New config should be saved
 	}
 }
 
@@ -67,15 +69,24 @@ func LoadConfig(filePath string) (*Config, error) {
 		return nil, err
 	}
 
+	// Initialize the Changed flag to false since we just loaded it
+	config.Changed = false
+
 	return &config, nil
 }
 
 // SaveConfig saves the configuration to the given file path
 func SaveConfig(config *Config, filePath string) error {
 	config.mutex.RLock()
-	defer config.mutex.RUnlock()
+	// Only proceed with saving if config has changed
+	if !config.Changed {
+		config.mutex.RUnlock()
+		return nil
+	}
 
 	data, err := json.MarshalIndent(config.Users, "", "  ")
+	config.mutex.RUnlock()
+
 	if err != nil {
 		return fmt.Errorf("failed to marshal config: %w", err)
 	}
@@ -92,6 +103,11 @@ func SaveConfig(config *Config, filePath string) error {
 	if err != nil {
 		return fmt.Errorf("failed to write config file %s: %w", filePath, err)
 	}
+
+	// Reset the Changed flag after successful save
+	config.mutex.Lock()
+	config.Changed = false
+	config.mutex.Unlock()
 
 	return nil
 }
@@ -124,6 +140,7 @@ func (c *Config) CreateUser(user string) *UserData {
 			Cron: make([]*CronJob, 0),
 			Data: make(map[string]interface{}),
 		}
+		c.Changed = true
 	}
 
 	return c.Users[user]
@@ -136,6 +153,7 @@ func (c *Config) DeleteUser(user string) bool {
 
 	if _, exists := c.Users[user]; exists {
 		delete(c.Users, user)
+		c.Changed = true
 		return true
 	}
 
@@ -202,6 +220,7 @@ func (c *Config) SetUserData(user, key string, value interface{}) {
 	}
 
 	userData.Data[key] = value
+	c.Changed = true
 }
 
 // DeleteUserData deletes data for a given user and key
@@ -216,6 +235,7 @@ func (c *Config) DeleteUserData(user, key string) bool {
 
 	if _, exists := userData.Data[key]; exists {
 		delete(userData.Data, key)
+		c.Changed = true
 		return true
 	}
 
@@ -254,12 +274,14 @@ func (c *Config) AddUserJob(user string, job *CronJob) {
 		if existingJob.ID == job.ID {
 			// Replace existing job
 			userData.Cron[i] = job
+			c.Changed = true
 			return
 		}
 	}
 
 	// Add new job
 	userData.Cron = append(userData.Cron, job)
+	c.Changed = true
 }
 
 // DeleteUserJob deletes a cron job for a given user
@@ -276,6 +298,7 @@ func (c *Config) DeleteUserJob(user, jobID string) bool {
 		if job.ID == jobID {
 			// Remove job
 			userData.Cron = append(userData.Cron[:i], userData.Cron[i+1:]...)
+			c.Changed = true
 			return true
 		}
 	}
@@ -314,7 +337,10 @@ func (c *Config) SetUserJobActive(user, jobID string, active bool) bool {
 
 	for _, job := range userData.Cron {
 		if job.ID == jobID {
-			job.Active = active
+			if job.Active != active {
+				job.Active = active
+				c.Changed = true
+			}
 			return true
 		}
 	}
@@ -332,8 +358,16 @@ func (c *Config) SetAllUserJobsActive(user string, active bool) bool {
 		return false
 	}
 
+	changed := false
 	for _, job := range userData.Cron {
-		job.Active = active
+		if job.Active != active {
+			job.Active = active
+			changed = true
+		}
+	}
+
+	if changed {
+		c.Changed = true
 	}
 
 	return true

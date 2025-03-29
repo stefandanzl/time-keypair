@@ -99,7 +99,10 @@ func autoSaveConfig(cfg *config.Config, filePath string, interval time.Duration,
 			if err := config.SaveConfig(cfg, filePath); err != nil {
 				log.Printf("Error auto-saving config: %v", err)
 			} else {
-				log.Printf("Configuration auto-saved to %s", filePath)
+				// Only log if config was actually saved (had changes)
+				if cfg.Changed {
+					log.Printf("Configuration auto-saved to %s", filePath)
+				}
 			}
 		case <-stopChan:
 			log.Println("Auto-save stopped")
