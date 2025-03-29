@@ -250,13 +250,12 @@ func (r *Router) handleCronJobActivation(w http.ResponseWriter, req *http.Reques
 
 	// Extract job ID from the path
 	// The path is /cron/{user_key}/{job_id}/on or /cron/{user_key}/{job_id}/off
-	// We need to extract the job_id part
 	parts := strings.Split(strings.Trim(req.URL.Path, "/"), "/")
-	if len(parts) < 3 {
+	if len(parts) < 4 {
 		http.Error(w, "Invalid URL format", http.StatusBadRequest)
 		return
 	}
-	jobID := parts[1] // cron/job_id/[on|off]
+	jobID := parts[2] // cron/user_key/job_id/[on|off]
 
 	// Get the job
 	job, exists := r.config.GetUserJob(user, jobID)
