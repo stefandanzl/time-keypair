@@ -96,8 +96,16 @@ echo "... (truncated for brevity)"
 echo -e "\nCleaning up - Deleting all load test users..."
 for i in $(seq 1 $TOTAL_USERS); do
   user="load_user_$i"
-  curl -s -X DELETE "${SERVER}/admin/${SUPER_KEY}/users/${user}" &
+  echo "Deleting user: $user with request: ${SERVER}/admin/${SUPER_KEY}/users/${user}"
+  response=$(curl -s -w "%{http_code}" -X DELETE "${SERVER}/admin/${SUPER_KEY}/users/${user}")
+  status_code=${response: -3}
+  content=${response:0:${#response}-3}
+  echo "Status code: $status_code"
+  if [ "$status_code" != "204" ]; then
+    echo "Response: $content"
+  else
+    echo "Successfully deleted user: $user"
+  fi
 done
-wait
 
 echo -e "\nLoad test completed!"

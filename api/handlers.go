@@ -44,7 +44,7 @@ func (r *Router) handleAdminUsers(w http.ResponseWriter, req *http.Request) {
 		// Delete a user
 		user := getPathPart(req.URL.Path, 3) // /admin/{super_key}/users/{user}
 		if user == "" {
-			http.Error(w, "User ID is required", http.StatusBadRequest)
+			http.Error(w, "User ID is required in path: /admin/{super_key}/users/{user}", http.StatusBadRequest)
 			return
 		}
 

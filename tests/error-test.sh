@@ -96,6 +96,14 @@ content=${response:0:${#response}-3}
 echo "Status code: $status_code"
 echo "Response: $content"
 
+# Test Case 11: Deleting without specifying user ID
+echo -e "\n\n11. Testing deletion without specifying user ID..."
+response=$(curl -s -w "%{http_code}" -X DELETE "${SERVER}/admin/${SUPER_KEY}/users")
+status_code=${response: -3}
+content=${response:0:${#response}-3}
+echo "Status code: $status_code"
+echo "Response: $content"
+
 # Cleanup - Delete test user
 echo -e "\n\nCleaning up - Deleting test user..."
 curl -s -X DELETE "${SERVER}/admin/${SUPER_KEY}/users/${TEST_USER}"

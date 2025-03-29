@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"strings"
 	"sync"
@@ -76,18 +77,23 @@ func SaveConfig(config *Config, filePath string) error {
 
 	data, err := json.MarshalIndent(config.Users, "", "  ")
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to marshal config: %w", err)
 	}
 
 	// Create directory if it doesn't exist
 	dir := extractDirectory(filePath)
 	if dir != "" {
 		if err := os.MkdirAll(dir, 0755); err != nil {
-			return err
+			return fmt.Errorf("failed to create directory %s: %w", dir, err)
 		}
 	}
 
-	return os.WriteFile(filePath, data, 0644)
+	err = os.WriteFile(filePath, data, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write config file %s: %w", filePath, err)
+	}
+
+	return nil
 }
 
 // extractDirectory extracts the directory part from a file path

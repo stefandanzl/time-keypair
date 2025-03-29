@@ -110,6 +110,13 @@ func matchPath(path, pattern string) bool {
 	pathParts := strings.Split(strings.Trim(path, "/"), "/")
 	patternParts := strings.Split(strings.Trim(pattern, "/"), "/")
 
+	// Special case for user deletion path: /admin/*/users/user1
+	if len(patternParts) == 3 && len(pathParts) == 4 && 
+	   patternParts[0] == "admin" && patternParts[2] == "users" && 
+	   pathParts[0] == "admin" && pathParts[2] == "users" {
+		return true
+	}
+
 	if len(pathParts) != len(patternParts) {
 		return false
 	}

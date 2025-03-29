@@ -17,7 +17,7 @@ func main() {
 	// Load environment variables or use defaults
 	port := getEnvOrDefault("PORT", "8080")
 	superAdminKey := getEnvOrDefault("SUPER_ADMIN_KEY", "super_admin_key")
-	configFilePath := getEnvOrDefault("CONFIG_FILE_PATH", "/config/config.json")
+	configFilePath := getEnvOrDefault("CONFIG_FILE_PATH", "./config/config.json")
 	autoSaveIntervalStr := getEnvOrDefault("AUTO_SAVE_INTERVAL", "60")
 
 	autoSaveInterval, err := strconv.Atoi(autoSaveIntervalStr)
@@ -26,10 +26,13 @@ func main() {
 	}
 
 	// Initialize configuration
+	log.Printf("Loading configuration from %s", configFilePath)
 	cfg, err := config.LoadConfig(configFilePath)
 	if err != nil {
 		log.Printf("Starting with empty configuration: %v", err)
 		cfg = config.NewConfig()
+	} else {
+		log.Printf("Configuration loaded successfully")
 	}
 
 	// Initialize cron scheduler

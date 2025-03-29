@@ -4,13 +4,14 @@ tasks:
   build:
     desc: Build the application
     cmds:
-      - go build -o ./build/server{{exeExt}} .
+      - go build -o ./build/cron-server{{exeExt}} .
 
   run:
     desc: Run the application
     deps: [build]
+    dir: build
     cmds:
-      - ./build/server{{exeExt}}
+      - ./cron-server{{exeExt}}
     env:
       PORT: '{{.PORT | default "8080"}}'
       SUPER_ADMIN_KEY: '{{.SUPER_ADMIN_KEY | default "super_admin_key"}}'
@@ -47,6 +48,14 @@ tasks:
     dir: tests
     cmds:
       - bash ./run-all-tests.sh
+
+  debug-config:
+    desc: Debug configuration file issues
+    cmds:
+      - mkdir -p ./config
+      - echo '{"test_user":{"cron":[],"data":{}}}' > ./config/config.json
+      - echo "Created test configuration at ./config/config.json"
+      - ls -la ./config
 
   clean:
     desc: Clean build artifacts
