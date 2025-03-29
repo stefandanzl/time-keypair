@@ -59,6 +59,7 @@ The server can be configured using environment variables:
 - [Go](https://golang.org/dl/) version 1.20 or higher
 - [Docker](https://www.docker.com/products/docker-desktop) (optional)
 - [Task](https://taskfile.dev/#/installation) - a task runner / simpler Make alternative
+- [jq](https://stedolan.github.io/jq/download/) - for parsing JSON in test scripts
 
 ### Build and Run
 
@@ -78,10 +79,44 @@ The server can be configured using environment variables:
    task docker-compose-up
    ```
 
-4. **Run Tests**:
-   ```bash
-   task test
-   ```
+## Testing
+
+The project includes several test scripts to validate functionality:
+
+### Basic Functionality Test
+
+Tests core API operations including user management, cron jobs, and data storage:
+
+```bash
+chmod +x ./test-api.sh
+./test-api.sh
+```
+
+### Load Test
+
+Tests performance under load by creating multiple users, jobs, and data entries concurrently:
+
+```bash
+chmod +x ./load-test.sh
+./load-test.sh
+```
+
+### Error Handling Test
+
+Tests how the API handles various error conditions and invalid inputs:
+
+```bash
+chmod +x ./error-test.sh
+./error-test.sh
+```
+
+### Unit Tests
+
+Runs all Go unit tests in the project:
+
+```bash
+task test
+```
 
 ## Usage Examples
 
@@ -92,7 +127,7 @@ curl -X POST http://localhost:8080/admin/super_admin_key/users -d '{"user":"user
 
 ### Create a new cron job
 ```bash
-curl -X POST http://localhost:8080/cron/user1/jobs -d '{"id":"job1","cron":"* * * * *","url":"https://example.com","active":true}'
+curl -X POST http://localhost:8080/cron/user1/jobs -d '{"id":"job1","cron":"0 * * * * *","url":"https://example.com","active":true}'
 ```
 
 ### Store data
@@ -113,7 +148,7 @@ The server uses a single JSON file for all configuration and data:
 {
   "user1": {
     "cron": [
-      {"id": "job1", "cron": "* * * * *", "url": "https://example.com", "active": true}
+      {"id": "job1", "cron": "0 * * * * *", "url": "https://example.com", "active": true}
     ],
     "data": {
       "key1": "value1",
@@ -125,3 +160,12 @@ The server uses a single JSON file for all configuration and data:
   }
 }
 ```
+
+## Note on Cron Expressions
+
+This server uses the [robfig/cron/v3](https://github.com/robfig/cron) package, which requires cron expressions to include a seconds field as the first value. For example:
+
+- Standard cron: `* * * * *` (minute, hour, day of month, month, day of week)
+- With this server: `0 * * * * *` (seconds, minute, hour, day of month, month, day of week)
+
+The first value specifies seconds (0-59), followed by the standard cron fields.

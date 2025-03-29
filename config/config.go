@@ -17,16 +17,22 @@ type CronJob struct {
 
 // MarshalJSON implements custom JSON marshaling for CronJob
 func (c *CronJob) MarshalJSON() ([]byte, error) {
-	// Create a safe copy of the job to avoid infinite recursion
-	type CronJobAlias CronJob
-	copy := (*CronJobAlias)(c)
-	
-	// Clean up double asterisks in the cron expression
-	if copy.Cron != "" {
-		copy.Cron = strings.ReplaceAll(copy.Cron, "**", "*")
+	type Alias struct {
+		ID     string `json:"id"`
+		Cron   string `json:"cron"`
+		URL    string `json:"url"`
+		Active bool   `json:"active"`
 	}
 	
-	return json.Marshal(copy)
+	// Create a clean copy with fixed cron expression
+	cleanCron := strings.ReplaceAll(c.Cron, "**", "*")
+	
+	return json.Marshal(&Alias{
+		ID:     c.ID,
+		Cron:   cleanCron,
+		URL:    c.URL,
+		Active: c.Active,
+	})
 }
 
 // UserData represents a user's configuration and data
