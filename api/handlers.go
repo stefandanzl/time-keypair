@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -48,6 +49,81 @@ func (r *Router) handleAdminReload(w http.ResponseWriter, req *http.Request) {
 	}{
 		Success: true,
 		Message: fmt.Sprintf("Configuration reloaded from %s", configFilePath),
+	}
+
+	respondJSON(w, response)
+}
+
+// handleCronAllJobsActivation handles activating or deactivating all cron jobs for a user
+func (r *Router) handleCronAllJobsActivation(w http.ResponseWriter, req *http.Request, activate bool) {
+	// Only allow GET method for activation/deactivation endpoints
+	if req.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Get user from context
+	user, ok := auth.UserFromContext(req.Context())
+	if !ok {
+		http.Error(w, "User not found in context", http.StatusInternalServerError)
+		return
+	}
+
+	// Get all jobs for the user
+	jobs := r.config.GetUserJobs(user)
+	if len(jobs) == 0 {
+		// No jobs found for this user
+		response := struct {
+			User    string `json:"user"`
+			Message string `json:"message"`
+		}{
+			User:    user,
+			Message: "No jobs found for this user",
+		}
+		respondJSON(w, response)
+		return
+	}
+
+	// Set the active state for all jobs
+	r.config.SetAllUserJobsActive(user, activate)
+
+	// Update scheduler
+	if activate {
+		// Add all jobs to scheduler if activating
+		activatedCount := 0
+		for _, job := range jobs {
+			if err := r.scheduler.AddJob(user, job); err != nil {
+				log.Printf("Failed to activate job %s: %v", job.ID, err)
+			} else {
+				activatedCount++
+			}
+		}
+		if activatedCount < len(jobs) {
+			log.Printf("Warning: Only %d of %d jobs were activated", activatedCount, len(jobs))
+		}
+	} else {
+		// Remove all jobs from scheduler if deactivating
+		for _, job := range jobs {
+			r.scheduler.RemoveJob(user, job.ID)
+		}
+	}
+
+	// Return response
+	action := "activated"
+	if !activate {
+		action = "deactivated"
+	}
+
+	response := struct {
+		User    string `json:"user"`
+		Action  string `json:"action"`
+		Count   int    `json:"count"`
+		Success bool   `json:"success"`
+	}{
+		User:    user,
+		Action:  action,
+		Count:   len(jobs),
+		Success: true,
 	}
 
 	respondJSON(w, response)

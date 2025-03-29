@@ -66,6 +66,10 @@ func (r *Router) setupCronRoutes() {
 		switch {
 		case matchPath(path, "/status/*"):
 			r.handleStatus(w, req)
+		case matchPath(path, "/cron/*/on"):
+			r.handleCronAllJobsActivation(w, req, true)
+		case matchPath(path, "/cron/*/off"):
+			r.handleCronAllJobsActivation(w, req, false)
 		case matchPath(path, "/cron/*/*/on"):
 			r.handleCronJobActivation(w, req, true)
 		case matchPath(path, "/cron/*/*/off"):

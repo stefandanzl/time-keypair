@@ -43,6 +43,8 @@ The server can be configured using environment variables:
 - `DELETE /cron/{user_key}/{job_id}`: Delete a specific job
 - `GET /cron/{user_key}/{job_id}/on`: Activate a specific job
 - `GET /cron/{user_key}/{job_id}/off`: Deactivate a specific job
+- `GET /cron/{user_key}/on`: Activate all jobs for a user
+- `GET /cron/{user_key}/off`: Deactivate all jobs for a user
 
 ### Data Endpoints
 
@@ -159,6 +161,15 @@ curl -X PUT http://localhost:8080/data/user1/settings -d '{"theme":"dark","notif
 ### Retrieve data
 ```bash
 curl http://localhost:8080/data/user1/settings
+```
+
+### Activate or deactivate all jobs for a user
+```bash
+# Activate all jobs for a user
+curl http://localhost:8080/cron/user1/on
+
+# Deactivate all jobs for a user
+curl http://localhost:8080/cron/user1/off
 ```
 
 ### Reload configuration from file

@@ -116,6 +116,31 @@ curl -s "${SERVER}/admin/${SUPER_KEY}/config" | jq
 echo -e "\n\nDeleting a user..."
 curl -s -X DELETE "${SERVER}/admin/${SUPER_KEY}/users/user2"
 
+# Test global job activation/deactivation
+echo -e "\n\nTesting global job activation/deactivation..."
+
+# First deactivate all jobs
+echo "Deactivating all jobs..."
+curl -s "${SERVER}/cron/${USER}/off" | jq
+
+# Wait a moment
+sleep 1
+
+# Check job status (should all be inactive)
+echo -e "\nChecking job status after global deactivation..."
+curl -s "${SERVER}/cron/${USER}" | jq '.[] | .active'
+
+# Now activate all jobs
+echo -e "\nActivating all jobs..."
+curl -s "${SERVER}/cron/${USER}/on" | jq
+
+# Wait a moment
+sleep 1
+
+# Check job status again (should all be active)
+echo -e "\nChecking job status after global activation..."
+curl -s "${SERVER}/cron/${USER}" | jq '.[] | .active'
+
 # Test configuration reload
 echo -e "\n\nTesting configuration reload..."
 curl -s "${SERVER}/admin/${SUPER_KEY}/reload" | jq
