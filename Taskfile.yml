@@ -150,10 +150,10 @@ tasks:
       - task: build-all
       - gh release create {{.VERSION}} --title "Time-Keypair {{.VERSION}}" --notes "New release of Time-Keypair, a multi-user cron server with data store." ./dist/*
 
-  # docker-build:
-  #   desc: Build Docker image
-  #   cmds:
-  #     - docker build -t time-keypair .
+  docker-build:
+    desc: Build Docker image
+    cmds:
+      - docker build -t time-keypair .
 
   docker-run:
     desc: Run Docker container
@@ -178,11 +178,11 @@ tasks:
     cmds:
       - docker-compose down
 
-  docker-build:
+  docker-build-ghcr:
     cmds:
       - docker build . -t ghcr.io/{{.GITHUB_USER}}/time-keypair:latest
 
-  docker-build-arm64:
+  docker-build-ghcr-arm64:
     env:
       GOOS: linux
       GOARCH: arm64
@@ -190,9 +190,11 @@ tasks:
       - docker build . -t ghcr.io/{{.GITHUB_USER}}/time-keypair:arm64-latest
 
   docker-push:
+    deps: [docker-build-ghcr]
     cmds:
       - docker push ghcr.io/{{.GITHUB_USER}}/time-keypair:latest
 
   docker-push-arm64:
+    deps: [docker-build-ghcr-arm64]
     cmds:
       - docker push ghcr.io/{{.GITHUB_USER}}/time-keypair:arm64-latest

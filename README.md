@@ -56,6 +56,18 @@ The server can be configured using environment variables:
 
 ## Getting Started
 
+### Docker Run
+
+````shell
+docker run -p 8080:8080 \
+        -e PORT=8080 \
+        -e SUPER_ADMIN_KEY=super_admin_key \
+        -e CONFIG_FILE_PATH=/config/config.json \
+        -e AUTO_SAVE_INTERVAL=60 \
+        -v ./config:/config \
+        ghcr.io/stefandanzl/time-keypair:latest
+````
+
 ### Prerequisites
 
 - [Go](https://golang.org/dl/) version 1.20 or higher
