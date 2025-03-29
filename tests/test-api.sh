@@ -22,12 +22,12 @@ curl -s "${SERVER}/admin/${SUPER_KEY}/users" | jq
 
 # Create a new cron job
 echo -e "\n\nCreating a new cron job..."
-curl -s -X POST "${SERVER}/cron/${USER}/jobs" \
+curl -s -X POST "${SERVER}/cron/${USER}" \
   -d "{\"id\":\"job1\",\"cron\":\"0 */5 * * * *\",\"url\":\"https://example.com\",\"active\":true}"
 
 # Get all jobs
 echo -e "\n\nGetting all jobs for user ${USER}..."
-curl -s "${SERVER}/cron/${USER}/jobs" | jq
+curl -s "${SERVER}/cron/${USER}" | jq
 
 # Store data
 echo -e "\n\nStoring data..."
@@ -44,17 +44,17 @@ curl -s "${SERVER}/status/${USER}" | jq
 
 # Create another job that's inactive
 echo -e "\n\nCreating an inactive job..."
-curl -s -X POST "${SERVER}/cron/${USER}/jobs" \
+curl -s -X POST "${SERVER}/cron/${USER}" \
   -d "{\"id\":\"job2\",\"cron\":\"0 0 * * * *\",\"url\":\"https://example.com/backup\",\"active\":false}"
 
 # Update an existing job
 echo -e "\n\nUpdating existing job..."
-curl -s -X PUT "${SERVER}/cron/${USER}/job/job1" \
+curl -s -X PUT "${SERVER}/cron/${USER}/job1" \
   -d "{\"cron\":\"0 */10 * * * *\",\"url\":\"https://example.com/updated\",\"active\":true}"
 
 # Get specific job after update
 echo -e "\n\nGetting specific job after update..."
-curl -s "${SERVER}/cron/${USER}/job/job1" | jq
+curl -s "${SERVER}/cron/${USER}/job1" | jq
 
 # Store nested data
 echo -e "\n\nStoring nested data..."
@@ -71,7 +71,7 @@ curl -s "${SERVER}/data/${USER}/keys" | jq
 
 # Delete a job
 echo -e "\n\nDeleting a job..."
-curl -s -X DELETE "${SERVER}/cron/${USER}/job/job2"
+curl -s -X DELETE "${SERVER}/cron/${USER}/job2"
 
 # Create another user
 echo -e "\n\nCreating another user..."
@@ -86,26 +86,26 @@ echo -e "\n\nTesting job activation/deactivation..."
 
 # First deactivate the job
 echo "Deactivating job..."
-curl -s "${SERVER}/cron/${USER}/job/job1/off" | jq
+curl -s "${SERVER}/cron/${USER}/job1/off" | jq
 
 # Wait a moment
 sleep 1
 
 # Check job status (should be inactive)
 echo -e "\nChecking job status after deactivation..."
-jobStatus=$(curl -s "${SERVER}/cron/${USER}/job/job1" | jq -r '.active')
+jobStatus=$(curl -s "${SERVER}/cron/${USER}/job1" | jq -r '.active')
 echo "Job active status: $jobStatus"
 
 # Now activate the job
 echo -e "\nActivating job..."
-curl -s "${SERVER}/cron/${USER}/job/job1/on" | jq
+curl -s "${SERVER}/cron/${USER}/job1/on" | jq
 
 # Wait a moment
 sleep 1
 
 # Check job status again (should be active)
 echo -e "\nChecking job status after activation..."
-jobStatus=$(curl -s "${SERVER}/cron/${USER}/job/job1" | jq -r '.active')
+jobStatus=$(curl -s "${SERVER}/cron/${USER}/job1" | jq -r '.active')
 echo "Job active status: $jobStatus"
 
 # Get full configuration

@@ -34,14 +34,14 @@ The server can be configured using environment variables:
 ### Cron Endpoints
 
 - `GET /status/{user_key}`: Get job statuses for a user
-- `GET /cron/{user_key}/jobs`: List all jobs for a user
-- `POST /cron/{user_key}/jobs`: Create a new job for a user
-- `PUT /cron/{user_key}/jobs`: Update all jobs for a user
-- `GET /cron/{user_key}/job/{job_id}`: Get a specific job
-- `PUT /cron/{user_key}/job/{job_id}`: Update a specific job
-- `DELETE /cron/{user_key}/job/{job_id}`: Delete a specific job
-- `GET /cron/{user_key}/job/{job_id}/on`: Activate a specific job
-- `GET /cron/{user_key}/job/{job_id}/off`: Deactivate a specific job
+- `GET /cron/{user_key}`: List all jobs for a user
+- `POST /cron/{user_key}`: Create a new job for a user
+- `PUT /cron/{user_key}`: Update all jobs for a user
+- `GET /cron/{user_key}/{job_id}`: Get a specific job
+- `PUT /cron/{user_key}/{job_id}`: Update a specific job
+- `DELETE /cron/{user_key}/{job_id}`: Delete a specific job
+- `GET /cron/{user_key}/{job_id}/on`: Activate a specific job
+- `GET /cron/{user_key}/{job_id}/off`: Deactivate a specific job
 
 ### Data Endpoints
 
@@ -126,7 +126,7 @@ curl -X POST http://localhost:8080/admin/super_admin_key/users -d '{"user":"user
 
 ### Create a new cron job
 ```bash
-curl -X POST http://localhost:8080/cron/user1/jobs -d '{"id":"job1","cron":"0 * * * * *","url":"https://example.com","active":true}'
+curl -X POST http://localhost:8080/cron/user1 -d '{"id":"job1","cron":"0 * * * * *","url":"https://example.com","active":true}'
 ```
 
 ### Store data
@@ -142,10 +142,10 @@ curl http://localhost:8080/data/user1/settings
 ### Activate or deactivate a cron job
 ```bash
 # Activate a job
-curl http://localhost:8080/cron/user1/job/job1/on
+curl http://localhost:8080/cron/user1/job1/on
 
 # Deactivate a job
-curl http://localhost:8080/cron/user1/job/job1/off
+curl http://localhost:8080/cron/user1/job1/off
 ```
 
 ## Configuration Format

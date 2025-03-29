@@ -64,14 +64,14 @@ func (r *Router) setupCronRoutes() {
 		switch {
 		case matchPath(path, "/status/*"):
 			r.handleStatus(w, req)
-		case matchPath(path, "/cron/*/jobs"):
-			r.handleCronJobs(w, req)
-		case matchPath(path, "/cron/*/job/*/on"):
+		case matchPath(path, "/cron/*/on"):
 			r.handleCronJobActivation(w, req, true)
-		case matchPath(path, "/cron/*/job/*/off"):
+		case matchPath(path, "/cron/*/off"):
 			r.handleCronJobActivation(w, req, false)
-		case matchPath(path, "/cron/*/job/*"):
+		case matchPath(path, "/cron/*/*"):
 			r.handleCronJob(w, req)
+		case matchPath(path, "/cron/*"):
+			r.handleCronJobs(w, req)
 		default:
 			http.NotFound(w, req)
 		}
@@ -121,12 +121,12 @@ func matchPath(path, pattern string) bool {
 		return true
 	}
 
-	// Special case for job activation/deactivation: /cron/*/job/*/on or /cron/*/job/*/off
-	if len(patternParts) == 3 && len(pathParts) == 5 && 
-	   patternParts[0] == "cron" && patternParts[2] == "job" && 
-	   pathParts[0] == "cron" && pathParts[2] == "job" &&
-	   (pathParts[4] == "on" || pathParts[4] == "off") {
-		// This matches /cron/*/job/*/on or /cron/*/job/*/off
+	// Special case for job activation/deactivation: /cron/*/on or /cron/*/off
+	if len(patternParts) == 2 && len(pathParts) == 3 && 
+	   patternParts[0] == "cron" && 
+	   pathParts[0] == "cron" &&
+	   (pathParts[2] == "on" || pathParts[2] == "off") {
+		// This matches /cron/*/on or /cron/*/off
 		return true
 	}
 
