@@ -1,5 +1,9 @@
 version: "3"
 
+vars:
+  VERSION:
+    sh: git describe --tags --abbrev=0
+
 tasks:
   build:
     desc: Build the application
@@ -57,10 +61,92 @@ tasks:
       - echo "Created test configuration at ./config/config.json"
       - ls -la ./config
 
-  clean:
-    desc: Clean build artifacts
+  version:
     cmds:
-      - rm -f cron-server
+      - task: fetch-tags
+      - echo {{.VERSION}}
+
+  fetch-tags:
+    cmds:
+      - git fetch --tags
+
+  bump-major:
+    desc: "Bump the minor version and tag Git"
+    vars:
+      NEW_TAG:
+        sh: echo {{.VERSION}} | awk -F. '{printf("%d.0.0", $1)}'
+    cmds:
+      - git tag -a "{{.NEW_TAG}}" -m "Release {{.NEW_TAG}}"
+
+  bump-minor:
+    desc: "Bump the minor version and tag Git"
+    vars:
+      NEW_TAG:
+        sh: echo {{.VERSION}} | awk -F. '{printf("%d.%d.0", $1, $2+1)}'
+    cmds:
+      - git tag -a "{{.NEW_TAG}}" -m "Release {{.NEW_TAG}}"
+
+  bump-patch:
+    desc: "Bump the minor version and tag Git"
+    vars:
+      NEW_TAG:
+        sh: echo {{.VERSION}} | awk -F. '{printf("%d.%d.%d", $1, $2, $3+1)}'
+    cmds:
+      - git tag -a "{{.NEW_TAG}}" -m "Release {{.NEW_TAG}}"
+
+  # Multi-OS build tasks
+  build-all:
+    desc: "Build for all supported platforms"
+    cmds:
+      - rm dist/* -r
+      - task: build-windows-amd64
+      - task: build-linux-amd64
+      - task: build-linux-arm64
+      - echo "All builds completed. Binaries are in ./dist/ directory"
+
+  build-windows-amd64:
+    desc: "Build for Windows AMD64"
+    env:
+      GOOS: windows
+      GOARCH: amd64
+    cmds:
+      - go build -o ./dist/time-keypair_{{.VERSION}}_windows_amd64.exe .
+      - echo "Windows AMD64 build complete"
+
+  build-linux-amd64:
+    desc: "Build for Linux AMD64"
+    env:
+      GOOS: linux
+      GOARCH: amd64
+    cmds:
+      - go build -o ./dist/time-keypair_{{.VERSION}}_linux_amd64 .
+      - echo "Linux AMD64 build complete"
+
+  build-linux-arm64:
+    desc: "Build for Linux ARM64"
+    env:
+      GOOS: linux
+      GOARCH: arm64
+    cmds:
+      - go build -o ./dist/time-keypair_{{.VERSION}}_linux_arm64 .
+      - echo "Linux ARM64 build complete"
+
+  release:
+    desc: "Commit Changes, create version tag, push to Github and create a new release on GitHub"
+    cmds:
+      - git add .
+      - cmd: git commit -m "{{.VERSION}} Commit"
+        ignore_error: true
+      # - git tag {{.VERSION}}
+      - git push
+      - git push --tags
+      - task: release-create
+
+  release-create:
+    desc: "Create a GitHub release with all binaries"
+    cmds:
+      - task: build-all
+      - gh release create {{.VERSION}} --title "Time-Keypair {{.VERSION}}" --notes "New release of Time-Keypair, a multi-user cron server with data store." ./dist/*
 
   docker-build:
     desc: Build Docker image
