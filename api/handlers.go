@@ -233,6 +233,75 @@ func (r *Router) handleCronJobs(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+// handleCronJobActivation handles activating or deactivating a cron job
+func (r *Router) handleCronJobActivation(w http.ResponseWriter, req *http.Request, activate bool) {
+	// Only allow GET method for activation/deactivation endpoints
+	if req.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Get user from context
+	user, ok := auth.UserFromContext(req.Context())
+	if !ok {
+		http.Error(w, "User not found in context", http.StatusInternalServerError)
+		return
+	}
+
+	// Extract job ID from the path
+	// The path is /cron/{user_key}/job/{job_id}/on or /cron/{user_key}/job/{job_id}/off
+	// We need to extract the job_id part
+	parts := strings.Split(strings.Trim(req.URL.Path, "/"), "/")
+	if len(parts) < 4 {
+		http.Error(w, "Invalid URL format", http.StatusBadRequest)
+		return
+	}
+	jobID := parts[3] // cron/user/job/job_id/[on|off]
+
+	// Get the job
+	job, exists := r.config.GetUserJob(user, jobID)
+	if !exists {
+		http.Error(w, "Job not found", http.StatusNotFound)
+		return
+	}
+
+	// Set active state if it's different
+	if job.Active != activate {
+		// Update in config
+		r.config.SetUserJobActive(user, jobID, activate)
+
+		// Update in scheduler
+		if activate {
+			// Add to scheduler if activating
+			if err := r.scheduler.AddJob(user, job); err != nil {
+				http.Error(w, fmt.Sprintf("Failed to activate job: %v", err), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			// Remove from scheduler if deactivating
+			r.scheduler.RemoveJob(user, jobID)
+		}
+	}
+
+	// Return response based on action
+	action := "activated"
+	if !activate {
+		action = "deactivated"
+	}
+	
+	response := struct {
+		ID     string `json:"id"`
+		Action string `json:"action"`
+		Active bool   `json:"active"`
+	}{
+		ID:     jobID,
+		Action: action,
+		Active: activate,
+	}
+
+	respondJSON(w, response)
+}
+
 // handleCronJob handles the cron job endpoint
 func (r *Router) handleCronJob(w http.ResponseWriter, req *http.Request) {
 	// Get user from context

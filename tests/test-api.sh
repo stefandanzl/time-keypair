@@ -81,6 +81,33 @@ curl -s -X POST "${SERVER}/admin/${SUPER_KEY}/users" -d "{\"user\":\"user2\"}"
 echo -e "\n\nGetting all users (should show both)..."
 curl -s "${SERVER}/admin/${SUPER_KEY}/users" | jq
 
+# Test job activation/deactivation
+echo -e "\n\nTesting job activation/deactivation..."
+
+# First deactivate the job
+echo "Deactivating job..."
+curl -s "${SERVER}/cron/${USER}/job/job1/off" | jq
+
+# Wait a moment
+sleep 1
+
+# Check job status (should be inactive)
+echo -e "\nChecking job status after deactivation..."
+jobStatus=$(curl -s "${SERVER}/cron/${USER}/job/job1" | jq -r '.active')
+echo "Job active status: $jobStatus"
+
+# Now activate the job
+echo -e "\nActivating job..."
+curl -s "${SERVER}/cron/${USER}/job/job1/on" | jq
+
+# Wait a moment
+sleep 1
+
+# Check job status again (should be active)
+echo -e "\nChecking job status after activation..."
+jobStatus=$(curl -s "${SERVER}/cron/${USER}/job/job1" | jq -r '.active')
+echo "Job active status: $jobStatus"
+
 # Get full configuration
 echo -e "\n\nGetting full configuration..."
 curl -s "${SERVER}/admin/${SUPER_KEY}/config" | jq

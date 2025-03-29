@@ -66,6 +66,10 @@ func (r *Router) setupCronRoutes() {
 			r.handleStatus(w, req)
 		case matchPath(path, "/cron/*/jobs"):
 			r.handleCronJobs(w, req)
+		case matchPath(path, "/cron/*/job/*/on"):
+			r.handleCronJobActivation(w, req, true)
+		case matchPath(path, "/cron/*/job/*/off"):
+			r.handleCronJobActivation(w, req, false)
 		case matchPath(path, "/cron/*/job/*"):
 			r.handleCronJob(w, req)
 		default:
@@ -114,6 +118,15 @@ func matchPath(path, pattern string) bool {
 	if len(patternParts) == 3 && len(pathParts) == 4 && 
 	   patternParts[0] == "admin" && patternParts[2] == "users" && 
 	   pathParts[0] == "admin" && pathParts[2] == "users" {
+		return true
+	}
+
+	// Special case for job activation/deactivation: /cron/*/job/*/on or /cron/*/job/*/off
+	if len(patternParts) == 3 && len(pathParts) == 5 && 
+	   patternParts[0] == "cron" && patternParts[2] == "job" && 
+	   pathParts[0] == "cron" && pathParts[2] == "job" &&
+	   (pathParts[4] == "on" || pathParts[4] == "off") {
+		// This matches /cron/*/job/*/on or /cron/*/job/*/off
 		return true
 	}
 

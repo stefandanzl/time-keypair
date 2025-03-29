@@ -40,6 +40,8 @@ The server can be configured using environment variables:
 - `GET /cron/{user_key}/job/{job_id}`: Get a specific job
 - `PUT /cron/{user_key}/job/{job_id}`: Update a specific job
 - `DELETE /cron/{user_key}/job/{job_id}`: Delete a specific job
+- `GET /cron/{user_key}/job/{job_id}/on`: Activate a specific job
+- `GET /cron/{user_key}/job/{job_id}/off`: Deactivate a specific job
 
 ### Data Endpoints
 
@@ -135,6 +137,15 @@ curl -X PUT http://localhost:8080/data/user1/settings -d '{"theme":"dark","notif
 ### Retrieve data
 ```bash
 curl http://localhost:8080/data/user1/settings
+```
+
+### Activate or deactivate a cron job
+```bash
+# Activate a job
+curl http://localhost:8080/cron/user1/job/job1/on
+
+# Deactivate a job
+curl http://localhost:8080/cron/user1/job/job1/off
 ```
 
 ## Configuration Format
