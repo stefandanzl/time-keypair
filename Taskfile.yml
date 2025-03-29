@@ -17,10 +17,40 @@ tasks:
       CONFIG_FILE_PATH: '{{.CONFIG_FILE_PATH | default "./config/config.json"}}'
       AUTO_SAVE_INTERVAL: '{{.AUTO_SAVE_INTERVAL | default "60"}}'
 
-  test:
-    desc: Run tests
+  test-unit:
+    desc: Run unit tests
     cmds:
       - go test -v ./...
+
+  test-api:
+    desc: Run API functionality tests
+    deps: [build]
+    cmds:
+      - bash ./tests/test-api.sh
+
+  test-load:
+    desc: Run load tests
+    deps: [build]
+    cmds:
+      - bash ./tests/load-test.sh
+
+  test-error:
+    desc: Run error handling tests
+    deps: [build]
+    cmds:
+      - bash ./tests/error-test.sh
+
+  test:
+    desc: Run all tests (alias for test-all)
+    cmds:
+      - go test ./...
+
+  test-all:
+    desc: Run all tests (unit tests, API tests, load tests, and error tests)
+    deps: [build]
+    dir: tests
+    cmds:
+      - bash ./run-all-tests.sh > test-all.log
 
   clean:
     desc: Clean build artifacts

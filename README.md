@@ -83,39 +83,36 @@ The server can be configured using environment variables:
 
 The project includes several test scripts to validate functionality:
 
-### Basic Functionality Test
+### Run All Tests
 
-Tests core API operations including user management, cron jobs, and data storage:
-
-```bash
-chmod +x ./test-api.sh
-./test-api.sh
-```
-
-### Load Test
-
-Tests performance under load by creating multiple users, jobs, and data entries concurrently:
-
-```bash
-chmod +x ./load-test.sh
-./load-test.sh
-```
-
-### Error Handling Test
-
-Tests how the API handles various error conditions and invalid inputs:
-
-```bash
-chmod +x ./error-test.sh
-./error-test.sh
-```
-
-### Unit Tests
-
-Runs all Go unit tests in the project:
+To run all tests (unit tests, API tests, load tests, and error handling tests):
 
 ```bash
 task test
+```
+
+or
+
+```bash
+task test-all
+```
+
+### Individual Test Categories
+
+- **Unit Tests**: `task test-unit`
+- **API Functionality Tests**: `task test-api`
+- **Load Tests**: `task test-load`
+- **Error Handling Tests**: `task test-error`
+
+### Test Scripts
+
+All test scripts are located in the `tests` directory and can also be run directly:
+
+```bash
+bash ./tests/test-api.sh
+bash ./tests/load-test.sh
+bash ./tests/error-test.sh
+bash ./tests/run-all-tests.sh
 ```
 
 ## Usage Examples
