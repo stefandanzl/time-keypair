@@ -179,10 +179,12 @@ tasks:
       - docker-compose down
 
   docker-build-ghcr:
+    internal: true
     cmds:
       - docker build . -t ghcr.io/{{.GITHUB_USER}}/time-keypair:latest
 
   docker-build-ghcr-arm64:
+    internal: true
     env:
       GOOS: linux
       GOARCH: arm64
@@ -190,11 +192,13 @@ tasks:
       - docker build . -t ghcr.io/{{.GITHUB_USER}}/time-keypair:arm64-latest
 
   docker-push:
+    desc: Build docker image for amd64 and push it to Github
     deps: [docker-build-ghcr]
     cmds:
       - docker push ghcr.io/{{.GITHUB_USER}}/time-keypair:latest
 
   docker-push-arm64:
+    desc: Build docker image for arm64 and push it to Github
     deps: [docker-build-ghcr-arm64]
     cmds:
       - docker push ghcr.io/{{.GITHUB_USER}}/time-keypair:arm64-latest
